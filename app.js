@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const photoTabs = document.getElementById("photoTabs");
   const downloadSheet = document.getElementById("downloadSheet");
   const deletePhoto = document.getElementById("deletePhoto");
+  const previewBlock = document.getElementById("previewBlock");
   const sheetPreview = document.getElementById("sheetPreview");
+  const refreshPreview = document.getElementById("refreshPreview");
   const zoomIn = document.getElementById("zoomIn");
   const zoomOut = document.getElementById("zoomOut");
   const reset = document.getElementById("reset");
@@ -49,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeIndex = photos.length - newPhotos.length;
 
     workspace.classList.remove("hidden");
+    previewBlock.classList.remove("hidden");
 
     renderTabs();
     updateStatus();
@@ -85,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (count === 0) {
       statusText.textContent = "";
-      sheetPreview.classList.add("hidden");
+      previewBlock.classList.add("hidden");
       return;
     }
 
@@ -173,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTabs();
     updateStatus();
     loadPhoto(activeIndex);
-    schedulePreviewUpdate();
   });
 
   zoomIn.addEventListener("click", () => {
@@ -198,6 +200,10 @@ document.addEventListener("DOMContentLoaded", () => {
     schedulePreviewUpdate();
   });
 
+  refreshPreview.addEventListener("click", async () => {
+    await updatePreview();
+  });
+
   downloadSheet.addEventListener("click", async () => {
     if (!cropper || photos.length === 0) {
       alert("Ajoutez au moins une photo.");
@@ -206,20 +212,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveCropData();
 
-    const croppedCanvases = [];
-
-    for (const photo of photos) {
-      const canvas = await cropImageFromPhoto(photo);
-      croppedCanvases.push(canvas);
-    }
-
-    const sheet = buildSheet(croppedCanvases);
+    const sheet = await createSheetFromPhotos();
     downloadCanvas(sheet, "pixi3d-planche-10x15cm.jpg");
   });
 
   function schedulePreviewUpdate() {
     clearTimeout(previewTimer);
-    previewTimer = setTimeout(updatePreview, 250);
+    previewTimer = setTimeout(updatePreview, 400);
   }
 
   async function updatePreview() {
@@ -227,14 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveCropData();
 
-    const croppedCanvases = [];
-
-    for (const photo of photos) {
-      const canvas = await cropImageFromPhoto(photo);
-      croppedCanvases.push(canvas);
-    }
-
-    const sheet = buildSheet(croppedCanvases);
+    const sheet = await createSheetFromPhotos();
 
     sheetPreview.width = SHEET_WIDTH;
     sheetPreview.height = SHEET_HEIGHT;
@@ -243,7 +235,18 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.clearRect(0, 0, SHEET_WIDTH, SHEET_HEIGHT);
     ctx.drawImage(sheet, 0, 0);
 
-    sheetPreview.classList.remove("hidden");
+    previewBlock.classList.remove("hidden");
+  }
+
+  async function createSheetFromPhotos() {
+    const croppedCanvases = [];
+
+    for (const photo of photos) {
+      const canvas = await cropImageFromPhoto(photo);
+      croppedCanvases.push(canvas);
+    }
+
+    return buildSheet(croppedCanvases);
   }
 
   function cropImageFromPhoto(photo) {
@@ -258,6 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
         container.style.width = "400px";
         container.style.height = "500px";
         container.style.opacity = "0";
+        container.style.pointerEvents = "none";
 
         tempImage.style.maxWidth = "400px";
         container.appendChild(tempImage);
