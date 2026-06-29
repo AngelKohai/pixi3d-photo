@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const photoTabs = document.getElementById("photoTabs");
   const downloadSheet = document.getElementById("downloadSheet");
   const deletePhoto = document.getElementById("deletePhoto");
+  const sheetPreview = document.getElementById("sheetPreview");
   const zoomIn = document.getElementById("zoomIn");
   const zoomOut = document.getElementById("zoomOut");
   const reset = document.getElementById("reset");
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let cropper = null;
   let photos = [];
   let activeIndex = 0;
+  let previewTimer = null;
 
   const PHOTO_WIDTH = 413;
   const PHOTO_HEIGHT = 531;
@@ -24,9 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fileInput.addEventListener("change", (event) => {
     const selectedFiles = Array.from(event.target.files || []);
 
-    if (selectedFiles.length === 0) {
-      return;
-    }
+    if (selectedFiles.length === 0) return;
 
     if (photos.length >= 6) {
       alert("Vous avez déjà ajouté 6 photos maximum.");
@@ -65,9 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
       button.type = "button";
       button.textContent = `Photo ${index + 1}`;
 
-      if (index === activeIndex) {
-        button.classList.add("active");
-      }
+      if (index === activeIndex) button.classList.add("active");
 
       button.addEventListener("click", () => {
         saveCropData();
@@ -79,11 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
       photoTabs.appendChild(button);
     });
 
-    if (photos.length > 0) {
-      deletePhoto.classList.remove("hidden");
-    } else {
-      deletePhoto.classList.add("hidden");
-    }
+    deletePhoto.classList.toggle("hidden", photos.length === 0);
   }
 
   function updateStatus() {
@@ -91,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (count === 0) {
       statusText.textContent = "";
+      sheetPreview.classList.add("hidden");
       return;
     }
 
@@ -105,17 +100,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadPhoto(index) {
     const photo = photos[index];
-
-    if (!photo) {
-      return;
-    }
+    if (!photo) return;
 
     image.src = photo.url;
 
     image.onload = () => {
-      if (cropper) {
-        cropper.destroy();
-      }
+      if (cropper) cropper.destroy();
 
       cropper = new Cropper(image, {
         aspectRatio: 35 / 45,
@@ -127,19 +117,18 @@ document.addEventListener("DOMContentLoaded", () => {
         cropBoxMovable: false,
         cropBoxResizable: false,
         ready() {
-          if (photo.cropData) {
-            cropper.setData(photo.cropData);
-          }
+          if (photo.cropData) cropper.setData(photo.cropData);
+          schedulePreviewUpdate();
+        },
+        crop() {
+          schedulePreviewUpdate();
         }
       });
     };
   }
 
   function saveCropData() {
-    if (!cropper || !photos[activeIndex]) {
-      return;
-    }
-
+    if (!cropper || !photos[activeIndex]) return;
     photos[activeIndex].cropData = cropper.getData(true);
   }
 
@@ -151,15 +140,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   deletePhoto.addEventListener("click", () => {
-    if (photos.length === 0) {
-      return;
-    }
+    if (photos.length === 0) return;
 
     const ok = confirm("Supprimer cette photo de la planche ?");
-
-    if (!ok) {
-      return;
-    }
+    if (!ok) return;
 
     const removedPhoto = photos.splice(activeIndex, 1)[0];
 
@@ -189,27 +173,29 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTabs();
     updateStatus();
     loadPhoto(activeIndex);
+    schedulePreviewUpdate();
   });
 
   zoomIn.addEventListener("click", () => {
     if (cropper) {
       cropper.zoom(0.1);
+      schedulePreviewUpdate();
     }
   });
 
   zoomOut.addEventListener("click", () => {
     if (cropper) {
       cropper.zoom(-0.1);
+      schedulePreviewUpdate();
     }
   });
 
   reset.addEventListener("click", () => {
-    if (!cropper || !photos[activeIndex]) {
-      return;
-    }
+    if (!cropper || !photos[activeIndex]) return;
 
     photos[activeIndex].cropData = null;
     cropper.reset();
+    schedulePreviewUpdate();
   });
 
   downloadSheet.addEventListener("click", async () => {
@@ -230,6 +216,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const sheet = buildSheet(croppedCanvases);
     downloadCanvas(sheet, "pixi3d-planche-10x15cm.jpg");
   });
+
+  function schedulePreviewUpdate() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(updatePreview, 250);
+  }
+
+  async function updatePreview() {
+    if (!cropper || photos.length === 0) return;
+
+    saveCropData();
+
+    const croppedCanvases = [];
+
+    for (const photo of photos) {
+      const canvas = await cropImageFromPhoto(photo);
+      croppedCanvases.push(canvas);
+    }
+
+    const sheet = buildSheet(croppedCanvases);
+
+    sheetPreview.width = SHEET_WIDTH;
+    sheetPreview.height = SHEET_HEIGHT;
+
+    const ctx = sheetPreview.getContext("2d");
+    ctx.clearRect(0, 0, SHEET_WIDTH, SHEET_HEIGHT);
+    ctx.drawImage(sheet, 0, 0);
+
+    sheetPreview.classList.remove("hidden");
+  }
 
   function cropImageFromPhoto(photo) {
     return new Promise((resolve) => {
@@ -254,9 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
           autoCropArea: 1,
           background: false,
           ready() {
-            if (photo.cropData) {
-              tempCropper.setData(photo.cropData);
-            }
+            if (photo.cropData) tempCropper.setData(photo.cropData);
 
             const canvas = tempCropper.getCroppedCanvas({
               width: PHOTO_WIDTH,
@@ -326,32 +339,5 @@ document.addEventListener("DOMContentLoaded", () => {
       link.click();
       URL.revokeObjectURL(link.href);
     }, "image/jpeg", 0.95);
-
-  previewSheet.addEventListener("click", async () => {
-  if (!cropper || photos.length === 0) {
-    alert("Ajoutez au moins une photo.");
-    return;
-  }
-
-  saveCropData();
-
-  const croppedCanvases = [];
-
-  for (const photo of photos) {
-    const canvas = await cropImageFromPhoto(photo);
-    croppedCanvases.push(canvas);
-  }
-
-  const sheet = buildSheet(croppedCanvases);
-
-  sheetPreview.width = SHEET_WIDTH;
-  sheetPreview.height = SHEET_HEIGHT;
-
-  const ctx = sheetPreview.getContext("2d");
-  ctx.clearRect(0, 0, SHEET_WIDTH, SHEET_HEIGHT);
-  ctx.drawImage(sheet, 0, 0);
-
-  sheetPreview.classList.remove("hidden");
-});
   }
 });
