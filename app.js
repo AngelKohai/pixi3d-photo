@@ -204,11 +204,20 @@ previewSheet.addEventListener("click", async () => {
   const sheet = await generateSheet();
   if (!sheet) return;
 
-  const previewCtx = sheetPreview.getContext("2d");
-  sheetPreview.width = SHEET_WIDTH;
-  sheetPreview.height = SHEET_HEIGHT;
-  previewCtx.clearRect(0, 0, SHEET_WIDTH, SHEET_HEIGHT);
-  previewCtx.drawImage(sheet, 0, 0);
+  const PREVIEW_SCALE = 0.25;
+
+sheetPreview.width = SHEET_WIDTH * PREVIEW_SCALE;
+sheetPreview.height = SHEET_HEIGHT * PREVIEW_SCALE;
+
+const ctx = sheetPreview.getContext("2d");
+ctx.clearRect(0, 0, sheetPreview.width, sheetPreview.height);
+ctx.drawImage(
+  sheet,
+  0,
+  0,
+  sheetPreview.width,
+  sheetPreview.height
+);
 
   sheetPreview.classList.remove("hidden");
 });
