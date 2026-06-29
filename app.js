@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusText = document.getElementById("statusText");
   const photoTabs = document.getElementById("photoTabs");
   const downloadSheet = document.getElementById("downloadSheet");
+  const deletePhoto = document.getElementById("deletePhoto");
   const zoomIn = document.getElementById("zoomIn");
   const zoomOut = document.getElementById("zoomOut");
   const reset = document.getElementById("reset");
@@ -12,19 +13,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let cropper = null;
   let photos = [];
   let activeIndex = 0;
-  let deleteButton = null;
 
   const PHOTO_WIDTH = 413;
   const PHOTO_HEIGHT = 531;
   const SHEET_WIDTH = 1181;
   const SHEET_HEIGHT = 1772;
 
-  createDeleteButton();
+  deletePhoto.classList.add("hidden");
 
   fileInput.addEventListener("change", (event) => {
-    const files = Array.from(event.target.files || []);
+    const selectedFiles = Array.from(event.target.files || []);
 
-    if (files.length === 0) {
+    if (selectedFiles.length === 0) {
       return;
     }
 
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveCropData();
 
     const availableSlots = 6 - photos.length;
-    const filesToAdd = files.slice(0, availableSlots);
+    const filesToAdd = selectedFiles.slice(0, availableSlots);
 
     const newPhotos = filesToAdd.map((file) => ({
       file,
@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
 
     photos = photos.concat(newPhotos);
-
     activeIndex = photos.length - newPhotos.length;
 
     workspace.classList.remove("hidden");
@@ -57,61 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fileInput.value = "";
   });
-
-  function createDeleteButton() {
-    deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "Supprimer cette photo";
-    deleteButton.className = "hidden";
-    deleteButton.style.width = "100%";
-    deleteButton.style.maxWidth = "260px";
-    deleteButton.style.margin = "4px auto 10px";
-    deleteButton.style.background = "#f5ddd8";
-    deleteButton.style.color = "#b85c4a";
-
-    photoTabs.insertAdjacentElement("afterend", deleteButton);
-
-    deleteButton.addEventListener("click", () => {
-      if (photos.length === 0) {
-        return;
-      }
-
-      const confirmDelete = confirm("Supprimer cette photo de la planche ?");
-
-      if (!confirmDelete) {
-        return;
-      }
-
-      const removedPhoto = photos.splice(activeIndex, 1)[0];
-
-      if (removedPhoto && removedPhoto.url) {
-        URL.revokeObjectURL(removedPhoto.url);
-      }
-
-      if (photos.length === 0) {
-        activeIndex = 0;
-
-        if (cropper) {
-          cropper.destroy();
-          cropper = null;
-        }
-
-        image.removeAttribute("src");
-        workspace.classList.add("hidden");
-        updateStatus();
-        renderTabs();
-        return;
-      }
-
-      if (activeIndex >= photos.length) {
-        activeIndex = photos.length - 1;
-      }
-
-      renderTabs();
-      updateStatus();
-      loadPhoto(activeIndex);
-    });
-  }
 
   function renderTabs() {
     photoTabs.innerHTML = "";
@@ -135,8 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
       photoTabs.appendChild(button);
     });
 
-    if (deleteButton) {
-      deleteButton.classList.toggle("hidden", photos.length === 0);
+    if (photos.length > 0) {
+      deletePhoto.classList.remove("hidden");
+    } else {
+      deletePhoto.classList.add("hidden");
     }
   }
 
@@ -204,12 +150,57 @@ document.addEventListener("DOMContentLoaded", () => {
     return 1;
   }
 
+  deletePhoto.addEventListener("click", () => {
+    if (photos.length === 0) {
+      return;
+    }
+
+    const ok = confirm("Supprimer cette photo de la planche ?");
+
+    if (!ok) {
+      return;
+    }
+
+    const removedPhoto = photos.splice(activeIndex, 1)[0];
+
+    if (removedPhoto && removedPhoto.url) {
+      URL.revokeObjectURL(removedPhoto.url);
+    }
+
+    if (photos.length === 0) {
+      activeIndex = 0;
+
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+
+      image.removeAttribute("src");
+      workspace.classList.add("hidden");
+      renderTabs();
+      updateStatus();
+      return;
+    }
+
+    if (activeIndex >= photos.length) {
+      activeIndex = photos.length - 1;
+    }
+
+    renderTabs();
+    updateStatus();
+    loadPhoto(activeIndex);
+  });
+
   zoomIn.addEventListener("click", () => {
-    if (cropper) cropper.zoom(0.1);
+    if (cropper) {
+      cropper.zoom(0.1);
+    }
   });
 
   zoomOut.addEventListener("click", () => {
-    if (cropper) cropper.zoom(-0.1);
+    if (cropper) {
+      cropper.zoom(-0.1);
+    }
   });
 
   reset.addEventListener("click", () => {
