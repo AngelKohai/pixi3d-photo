@@ -12,34 +12,106 @@ document.addEventListener("DOMContentLoaded", () => {
   let cropper = null;
   let photos = [];
   let activeIndex = 0;
+  let deleteButton = null;
 
   const PHOTO_WIDTH = 413;
   const PHOTO_HEIGHT = 531;
   const SHEET_WIDTH = 1181;
   const SHEET_HEIGHT = 1772;
 
+  createDeleteButton();
+
   fileInput.addEventListener("change", (event) => {
-    const files = Array.from(event.target.files || []).slice(0, 6);
+    const files = Array.from(event.target.files || []);
 
     if (files.length === 0) {
       return;
     }
 
-    photos.forEach((photo) => URL.revokeObjectURL(photo.url));
+    if (photos.length >= 6) {
+      alert("Vous avez déjà ajouté 6 photos maximum.");
+      fileInput.value = "";
+      return;
+    }
 
-    photos = files.map((file) => ({
+    saveCropData();
+
+    const availableSlots = 6 - photos.length;
+    const filesToAdd = files.slice(0, availableSlots);
+
+    const newPhotos = filesToAdd.map((file) => ({
       file,
       url: URL.createObjectURL(file),
       cropData: null
     }));
 
-    activeIndex = 0;
+    photos = photos.concat(newPhotos);
+
+    activeIndex = photos.length - newPhotos.length;
+
     workspace.classList.remove("hidden");
 
     renderTabs();
     updateStatus();
     loadPhoto(activeIndex);
+
+    fileInput.value = "";
   });
+
+  function createDeleteButton() {
+    deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Supprimer cette photo";
+    deleteButton.className = "hidden";
+    deleteButton.style.width = "100%";
+    deleteButton.style.maxWidth = "260px";
+    deleteButton.style.margin = "4px auto 10px";
+    deleteButton.style.background = "#f5ddd8";
+    deleteButton.style.color = "#b85c4a";
+
+    photoTabs.insertAdjacentElement("afterend", deleteButton);
+
+    deleteButton.addEventListener("click", () => {
+      if (photos.length === 0) {
+        return;
+      }
+
+      const confirmDelete = confirm("Supprimer cette photo de la planche ?");
+
+      if (!confirmDelete) {
+        return;
+      }
+
+      const removedPhoto = photos.splice(activeIndex, 1)[0];
+
+      if (removedPhoto && removedPhoto.url) {
+        URL.revokeObjectURL(removedPhoto.url);
+      }
+
+      if (photos.length === 0) {
+        activeIndex = 0;
+
+        if (cropper) {
+          cropper.destroy();
+          cropper = null;
+        }
+
+        image.removeAttribute("src");
+        workspace.classList.add("hidden");
+        updateStatus();
+        renderTabs();
+        return;
+      }
+
+      if (activeIndex >= photos.length) {
+        activeIndex = photos.length - 1;
+      }
+
+      renderTabs();
+      updateStatus();
+      loadPhoto(activeIndex);
+    });
+  }
 
   function renderTabs() {
     photoTabs.innerHTML = "";
@@ -62,10 +134,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       photoTabs.appendChild(button);
     });
+
+    if (deleteButton) {
+      deleteButton.classList.toggle("hidden", photos.length === 0);
+    }
   }
 
   function updateStatus() {
     const count = photos.length;
+
+    if (count === 0) {
+      statusText.textContent = "";
+      return;
+    }
+
     const copies = getCopiesPerPhoto(count);
     const total = count * copies;
 
@@ -131,7 +213,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   reset.addEventListener("click", () => {
-    if (cropper) cropper.reset();
+    if (!cropper || !photos[activeIndex]) {
+      return;
+    }
+
+    photos[activeIndex].cropData = null;
+    cropper.reset();
   });
 
   downloadSheet.addEventListener("click", async () => {
