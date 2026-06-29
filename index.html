@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixi3D - Photo du mois</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="card">
+      <div class="brand">Pixi3D</div>
+      <h1>Photo du mois</h1>
+      <p class="intro">
+        Importez une photo, recadrez-la au format du cadre, puis téléchargez-la prête à imprimer.
+      </p>
+
+      <label class="upload">
+        Choisir une photo
+        <input id="fileInput" type="file" accept="image/*" />
+      </label>
+
+      <div id="editor" class="editor hidden">
+        <div class="image-wrap">
+          <img id="image" alt="Photo à recadrer" />
+        </div>
+
+        <div class="controls">
+          <button id="zoomOut" type="button">−</button>
+          <button id="zoomIn" type="button">+</button>
+          <button id="reset" type="button">Réinitialiser</button>
+        </div>
+
+        <button id="downloadPhoto" class="primary" type="button">
+          Télécharger la photo 35 × 45 mm
+        </button>
+
+        <button id="downloadSheet" class="secondary" type="button">
+          Télécharger une planche 10 × 15 cm
+        </button>
+      </div>
+
+      <p class="note">
+        Les photos restent sur votre téléphone ou ordinateur. Elles ne sont pas envoyées sur un serveur.
+      </p>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
