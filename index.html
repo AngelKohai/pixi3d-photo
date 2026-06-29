@@ -12,16 +12,29 @@
     <section class="card">
       <div class="brand">Pixi3D</div>
       <h1>Photo du mois</h1>
+
       <p class="intro">
-        Importez une photo, recadrez-la au format du cadre, puis téléchargez-la prête à imprimer.
+        Ajoutez entre 1 et 6 photos. L'outil crée automatiquement une planche 10 × 15 cm à imprimer.
       </p>
 
+      <div class="rules">
+        <strong>Copies automatiques :</strong>
+        <span>1 photo = 6 copies</span>
+        <span>2 photos = 3 copies chacune</span>
+        <span>3 photos = 2 copies chacune</span>
+        <span>4 à 6 photos = 1 copie chacune</span>
+      </div>
+
       <label class="upload">
-        Choisir une photo
-        <input id="fileInput" type="file" accept="image/*" />
+        Choisir 1 à 6 photos
+        <input id="fileInput" type="file" accept="image/*" multiple />
       </label>
 
-      <div id="editor" class="editor hidden">
+      <div id="workspace" class="hidden">
+        <div class="status" id="statusText"></div>
+
+        <div class="photo-tabs" id="photoTabs"></div>
+
         <div class="image-wrap">
           <img id="image" alt="Photo à recadrer" />
         </div>
@@ -32,17 +45,19 @@
           <button id="reset" type="button">Réinitialiser</button>
         </div>
 
-        <button id="downloadPhoto" class="primary" type="button">
-          Télécharger la photo 35 × 45 mm
+        <button id="previewSheet" class="secondary" type="button">
+          Voir l'aperçu de la planche
         </button>
 
-        <button id="downloadSheet" class="secondary" type="button">
-          Télécharger une planche 10 × 15 cm
+        <button id="downloadSheet" class="primary" type="button">
+          Télécharger la planche 10 × 15 cm
         </button>
+
+        <canvas id="sheetPreview" class="sheet-preview hidden"></canvas>
       </div>
 
       <p class="note">
-        Les photos restent sur votre téléphone ou ordinateur. Elles ne sont pas envoyées sur un serveur.
+        Vos photos restent sur votre téléphone ou ordinateur. Aucune photo n'est envoyée sur Internet.
       </p>
     </section>
   </main>
