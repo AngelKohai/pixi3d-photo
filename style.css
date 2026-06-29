@@ -117,6 +117,14 @@ h1 {
   color: white;
 }
 
+.delete-photo-button {
+  width: 100%;
+  max-width: 260px;
+  margin: 4px auto 10px;
+  background: #f5ddd8;
+  color: #b85c4a;
+}
+
 .editor {
   width: 100%;
   max-height: 430px;
