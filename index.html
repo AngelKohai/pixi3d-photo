@@ -1,19 +1,16 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pixi3D - Photo du mois</title>
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <main class="app">
     <section class="card">
       <div class="brand">Pixi3D</div>
-
       <h1>Photo du mois</h1>
 
       <p class="intro">
@@ -28,22 +25,22 @@
         <span>4 à 6 photos = 1 copie chacune</span>
       </div>
 
-      <label class="upload-button">
+      <label class="upload">
         Choisir 1 à 6 photos
-        <input id="fileInput" type="file" accept="image/*" multiple>
+        <input id="fileInput" type="file" accept="image/*" multiple />
       </label>
 
       <div id="workspace" class="hidden">
-        <p id="statusText" class="status"></p>
+        <div class="status" id="statusText"></div>
 
-        <div id="photoTabs" class="photo-tabs"></div>
+        <div class="photo-tabs" id="photoTabs"></div>
 
         <button id="deletePhoto" class="delete-photo-button" type="button">
           Supprimer cette photo
         </button>
 
-        <div class="editor">
-          <img id="image" alt="Photo à recadrer">
+        <div class="image-wrap">
+          <img id="image" alt="Photo à recadrer" />
         </div>
 
         <div class="controls">
@@ -52,17 +49,15 @@
           <button id="reset" type="button">Réinitialiser</button>
         </div>
 
-        <div id="previewBlock" class="preview-block hidden">
-          <p class="preview-title">Aperçu de la planche 10 × 15 cm</p>
-          <canvas id="sheetPreview" class="sheet-preview"></canvas>
-          <button id="refreshPreview" class="secondary" type="button">
-            Actualiser l'aperçu
-          </button>
-        </div>
+        <button id="previewSheet" class="secondary" type="button">
+          Voir l'aperçu de la planche
+        </button>
 
         <button id="downloadSheet" class="primary" type="button">
           Télécharger la planche 10 × 15 cm
         </button>
+
+        <canvas id="sheetPreview" class="sheet-preview hidden"></canvas>
       </div>
 
       <p class="note">
