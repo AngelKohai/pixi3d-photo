@@ -326,5 +326,32 @@ document.addEventListener("DOMContentLoaded", () => {
       link.click();
       URL.revokeObjectURL(link.href);
     }, "image/jpeg", 0.95);
+
+  previewSheet.addEventListener("click", async () => {
+  if (!cropper || photos.length === 0) {
+    alert("Ajoutez au moins une photo.");
+    return;
+  }
+
+  saveCropData();
+
+  const croppedCanvases = [];
+
+  for (const photo of photos) {
+    const canvas = await cropImageFromPhoto(photo);
+    croppedCanvases.push(canvas);
+  }
+
+  const sheet = buildSheet(croppedCanvases);
+
+  sheetPreview.width = SHEET_WIDTH;
+  sheetPreview.height = SHEET_HEIGHT;
+
+  const ctx = sheetPreview.getContext("2d");
+  ctx.clearRect(0, 0, SHEET_WIDTH, SHEET_HEIGHT);
+  ctx.drawImage(sheet, 0, 0);
+
+  sheetPreview.classList.remove("hidden");
+});
   }
 });
