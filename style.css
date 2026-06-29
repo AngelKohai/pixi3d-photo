@@ -167,11 +167,6 @@ button {
   color: white;
 }
 
-.note {
-  font-size: 14px;
-  margin-top: 18px;
-}
-
 .sheet-preview {
   width: 100%;
   max-width: 260px;
@@ -180,6 +175,11 @@ button {
   border: 1px solid var(--border);
   border-radius: 12px;
   background: white;
+}
+
+.note {
+  font-size: 14px;
+  margin-top: 18px;
 }
 
 @media (max-width: 480px) {
