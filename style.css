@@ -39,7 +39,7 @@ body {
 
 .brand {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: #efe0cc;
   color: var(--accent-dark);
@@ -49,48 +49,49 @@ body {
 
 h1 {
   margin: 0 0 10px;
-  font-size: 32px;
+  font-size: 34px;
 }
 
-.intro, .note {
+.intro,
+.note {
   color: var(--muted);
   line-height: 1.45;
 }
 
 .rules {
   display: grid;
-  gap: 6px;
-  margin: 18px 0;
-  padding: 14px;
-  border-radius: 18px;
+  gap: 7px;
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 20px;
   background: #f1e3d1;
   color: var(--accent-dark);
-  font-size: 14px;
+  font-size: 15px;
 }
 
-.upload {
+.upload-button {
   display: inline-block;
-  margin: 12px 0 18px;
-  padding: 14px 20px;
-  border-radius: 16px;
+  margin: 16px 0 22px;
+  padding: 15px 22px;
+  border-radius: 18px;
   background: var(--accent);
   color: white;
   font-weight: 800;
   cursor: pointer;
 }
 
-.upload input {
+.upload-button input {
   display: none;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .status {
+  margin: 0 0 14px;
+  font-weight: 800;
   color: var(--accent-dark);
-  font-weight: 700;
-  margin-bottom: 12px;
 }
 
 .photo-tabs {
@@ -98,13 +99,17 @@ h1 {
   gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 12px 0;
+  margin: 14px 0;
 }
 
 .photo-tabs button {
   border: 1px solid var(--border);
   background: #fff7ec;
   color: var(--text);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .photo-tabs button.active {
@@ -112,16 +117,16 @@ h1 {
   color: white;
 }
 
-.image-wrap {
+.editor {
   width: 100%;
-  max-height: 420px;
+  max-height: 430px;
   margin: 18px auto;
   border-radius: 20px;
   overflow: hidden;
   background: #f0e5d5;
 }
 
-.image-wrap img {
+.editor img {
   display: block;
   max-width: 100%;
 }
@@ -147,32 +152,29 @@ button {
   color: var(--text);
 }
 
-.primary, .secondary {
+.primary {
   width: 100%;
   margin-top: 10px;
-}
-
-.primary {
   background: var(--accent);
   color: white;
-}
-
-.secondary {
-  background: #eadcc9;
-  color: var(--accent-dark);
-}
-
-.sheet-preview {
-  width: 100%;
-  max-width: 260px;
-  height: auto;
-  margin-top: 18px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: white;
 }
 
 .note {
   font-size: 14px;
   margin-top: 18px;
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
 }
